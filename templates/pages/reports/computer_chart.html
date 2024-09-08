@@ -1,0 +1,251 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h5>Stacked Bar Chart</h5>
+    <div class="chart-container" id="chart"></div>
+</div>
+
+{% block javascripts %}
+{{ block.super }}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse the data passed from Django
+        let data;
+        try {
+            data = JSON.parse('{{ chart_data|safe }}');
+            console.log("Parsed data:", data);
+        } catch (error) {
+            console.error("Error parsing data:", error);
+            return;
+        }
+    
+        if (!Array.isArray(data) || data.length === 0) {
+            console.error("Data is empty or not an array");
+            return;
+        }
+    
+        // Function to generate a random hex color
+        function getRandomColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        }
+    
+        // Function to assign unique colors to domain IDs
+        function assignColors(data) {
+            const colorMap = new Map();
+            data.forEach(dateData => {
+                dateData.domains.forEach(domain => {
+                    if (!colorMap.has(domain.DomainID)) {
+                        colorMap.set(domain.DomainID, getRandomColor());
+                    }
+                });
+            });
+            return colorMap;
+        }
+    
+        // Assign colors to domain IDs
+        const colorMap = assignColors(data);
+    
+        // Function to generate a valid class name from a date
+        function dateToClassName(date) {
+            return 'date-' + new Date(date).getTime();
+        }
+    
+        // Set up chart dimensions
+        const margin = {top: 20, right: 30, bottom: 40, left: 120};
+        const width = 800 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+    
+        // Create SVG
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+    
+        // Set up scales
+        const y = d3.scaleBand()
+            .range([height, 0])
+            .padding(0.1);
+    
+        const x = d3.scaleLinear()
+            .range([0, width]);
+    
+        // Set domains
+        y.domain(data.map(d => d.cdate));
+        const xMin = d3.min(data, d => d.domains ? d3.min(d.domains, domain => domain.rdcount) : 0);
+        const xMax = d3.max(data, d => d.domains ? d3.max(d.domains, domain => domain.ndcount) : 0);
+        x.domain([xMin, xMax]).nice();
+    
+        // Create a tooltip div
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+    
+        // Define a function to calculate bar thickness
+        const getBarThickness = () => {
+            return y.bandwidth() * 0.8;  // Adjust the multiplier (0.8) to change bar thickness
+        };
+    
+        // Function to generate grid lines
+        function make_x_gridlines() {
+            const tickValues = [];
+            let tickValue = Math.floor(xMin / 40) * 40;
+            while (tickValue <= xMax) {
+                tickValues.push(tickValue);
+                tickValue += 40;
+            }
+            return d3.axisBottom(x)
+                .tickValues(tickValues);
+        }
+
+        // Add the X gridlines
+        svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", `translate(0,${height})`)
+        .call(make_x_gridlines()
+            .tickSize(-height)
+            .tickFormat("")
+        )
+        .call(g => g.select(".domain").remove())
+        .call(g => g.selectAll(".tick line")
+            .attr("stroke", "#e0e0e0")
+            .attr("stroke-opacity", 0.6));
+
+        // Create and add the stacked bars
+        data.forEach(dateData => {
+            if (!dateData.domains || !Array.isArray(dateData.domains)) {
+                console.error("Invalid domains for date:", dateData.cdate);
+                return;
+            }
+    
+            const className = dateToClassName(dateData.cdate);
+    
+
+            // Positive bars
+            svg.selectAll(`.bar-positive-${className}`)
+                .data(dateData.domains.filter(d => d && d.ndcount > 0))
+                .enter().append("rect")
+                .attr("class", `bar-positive-${className}`)
+                .attr("y", () => y(dateData.cdate) + (y.bandwidth() - getBarThickness()) / 2)  // Center the bar
+                .attr("x", x(0))
+                .attr("width", d => x(d.ndcount) - x(0))
+                .attr("height", getBarThickness())
+                .attr("fill", d => colorMap.get(d.DomainID))
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(100)
+                        .style("opacity", .9);
+                    tooltip.html(`Date: ${dateData.cdate}<br>DomainID: ${d.DomainID}<br>Positive Count: ${d.ndcount}`)
+                        .style("left", (event.pageX) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function() {
+                    tooltip.transition()
+                        .duration(100)
+                        .style("opacity", 0);
+                });
+    
+            // Negative bars
+            svg.selectAll(`.bar-negative-${className}`)
+                .data(dateData.domains.filter(d => d && d.rdcount < 0))
+                .enter().append("rect")
+                .attr("class", `bar-negative-${className}`)
+                .attr("y", () => y(dateData.cdate) + (y.bandwidth() - getBarThickness()) / 2)  // Center the bar
+                .attr("x", d => x(d.rdcount))
+                .attr("width", d => x(0) - x(d.rdcount))
+                .attr("height", getBarThickness())
+                .attr("fill", d => colorMap.get(d.DomainID))
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(100)
+                        .style("opacity", .9);
+                    tooltip.html(`Date: ${dateData.cdate}<br>DomainID: ${d.DomainID}<br>Negative Count: ${Math.abs(d.rdcount)}`)
+                        .style("left", (event.pageX) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function() {
+                    tooltip.transition()
+                        .duration(100)
+                        .style("opacity", 0);
+                });
+        });
+    
+
+
+        // Add the X Axis at the top
+        svg.append("g")
+        .attr("transform", `translate(0,0)`)
+        .call(d3.axisTop(x)
+            .tickSize(0)  // This removes the tick lines
+        )
+        .call(g => g.select(".domain").remove())  // This removes the main axis line
+        .call(g => g.selectAll(".tick text")  
+            .attr("y", -10)  // Adjust this value to move labels up or down
+            .style("text-anchor", "middle")  // This centers the text on the tick
+            .style("font-size", "11px"));
+        
+        // Add the Y Axis (modified to remove the line but keep labels)
+        svg.append("g")
+            .call(d3.axisLeft(y).tickSize(0))
+            .call(g => g.select(".domain").remove())
+            .call(g => g.selectAll(".tick text")
+                .attr("x", -10)  // Adjust this value to move labels left or right
+                .style("text-anchor", "end")
+                .style("font-size", "12px"));
+    
+        // Add a zero line
+        svg.append("line")
+            .attr("y1", 0)
+            .attr("y2", height)
+            .attr("x1", x(0))
+            .attr("x2", x(0))
+            .attr("stroke", "white")
+            .attr("stroke-width", 4);
+    
+        // Add legend
+        const legendData = Array.from(colorMap, ([domainID, color]) => ({domainID, color}));
+        const legend = svg.append("g")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", 10)
+            .attr("text-anchor", "end")
+            .selectAll("g")
+            .data(legendData)
+            .enter().append("g")
+            .attr("transform", (d, i) => `translate(0,${i * 20})`);
+    
+        legend.append("rect")
+            .attr("x", width - 19)
+            .attr("width", 19)
+            .attr("height", 19)
+            .attr("fill", d => d.color);
+    
+        legend.append("text")
+            .attr("x", width - 24)
+            .attr("y", 9.5)
+            .attr("dy", "0.32em")
+            .text(d => `Domain ID: ${d.domainID}`);
+    });
+</script>
+<style>
+    .tooltip {
+        position: absolute;
+        text-align: center;
+        padding: 8px;
+        font: 12px sans-serif;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .chart-container {
+        margin-top: 20px;
+    }
+</style>
+{% endblock javascripts %}
+{% endblock content %}

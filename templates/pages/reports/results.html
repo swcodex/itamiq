@@ -1,0 +1,24 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<h2>Query Results</h2>
+<table class="table">
+    <thead>
+        <tr>
+            {% for column in results.0 %}
+                <th>Column {{ forloop.counter }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in results %}
+            <tr>
+                {% for value in row %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'reports:run_query' %}" class="btn btn-secondary">Run Another Query</a>
+{% endblock %}

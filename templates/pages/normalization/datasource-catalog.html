@@ -1,0 +1,222 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% csrf_token %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'assets/css/plugins/uppy.min.css' %}">
+{% endblock extrastyle %}
+
+{% block content %}
+<style>
+    .file-uploader-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card file-uploader-container">
+            <div class="card-header">
+                <h5>Upload CSV or XLSX File</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label for="datasource-name">Data Source Name</label>
+                    <input type="text" class="form-control" id="datasource-name" required>
+                </div>
+                <div class="pc-uppy-3">
+                    <div class="for-DragDrop"></div>
+                    <div class="for-ProgressBar"></div>
+                </div>
+                <div class="mt-3">
+                    <button id="start-upload" class="btn btn-primary">Start Upload</button>
+                    <button id="upload-another" class="btn btn-secondary" style="display: none;">Upload Another</button>
+                </div>
+            </div>
+        </div>
+        <div id="upload-confirmation" class="alert alert-success mt-3" style="display: none;"></div>
+    </div>
+</div>
+<div id="datasource-cards" class="row mt-4">
+    {% for table in existing_tables %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ table.displayName }}</h5>
+                <p class="card-text">Rows: {{ table.rowCount }}</p>
+                <button class="btn btn-danger delete-datasource" data-table="{{ table.name }}">Delete</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/plugins/uppy.min.js' %}"></script>
+<script>
+
+    document.getElementById('start-upload').addEventListener('click', startUpload);
+    document.getElementById('upload-another').addEventListener('click', resetUploader);
+
+    const Uppy = window.Uppy.Core;
+    const XHRUpload = window.Uppy.XHRUpload;
+    const DragDrop = window.Uppy.DragDrop;
+    const ProgressBar = window.Uppy.ProgressBar;
+
+    // Get CSRF token function (keep as is)
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+    const csrftoken = getCookie('csrftoken');
+
+    const uppy = new Uppy({
+        debug: true,
+        autoProceed: false,
+        restrictions: {
+            maxNumberOfFiles: 1,
+            allowedFileTypes: ['.csv', '.xlsx']
+        }
+    });
+
+    uppy.use(DragDrop, {
+        target: '.pc-uppy-3 .for-DragDrop'
+    });
+
+    uppy.use(ProgressBar, {
+        target: '.pc-uppy-3 .for-ProgressBar',
+        hideAfterFinish: false
+    });
+
+    uppy.use(XHRUpload, {
+        endpoint: '{% url "normalization:upload_file" %}',
+        formData: true,
+        fieldName: 'file',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        metaFields: ['datasourceName'],
+        getResponseData: (responseText, response) => {
+            return JSON.parse(responseText);
+        }
+    });
+
+
+    uppy.on('upload-success', (file, response) => {
+    console.log('Upload success', response);
+    console.log('File:', file);
+    if (response.body) {
+        const { tableName, displayName, rowCount } = response.body;
+        addDatasourceCard(tableName, displayName, rowCount);
+        
+        // Show confirmation message
+        const confirmationElement = document.getElementById('upload-confirmation');
+        confirmationElement.textContent = `File "${file.name}" uploaded successfully as "${displayName}"`;
+        confirmationElement.style.display = 'block';
+        
+        // Hide confirmation message after 5 seconds
+        setTimeout(() => {
+            confirmationElement.style.display = 'none';
+        }, 5000);
+        
+        // Show 'Upload Another' button and hide 'Start Upload' button
+        document.getElementById('start-upload').style.display = 'none';
+        document.getElementById('upload-another').style.display = 'inline-block';
+        
+        // Disable the file input and datasource name input
+        uppy.getPlugin('DragDrop').disable();
+        document.getElementById('datasource-name').disabled = true;
+    } else {
+        console.error('Unexpected response format:', response);
+    }
+});
+
+uppy.on('upload-error', (file, error, response) => {
+    console.error('Uppy error:', error);
+    console.error('Error response:', response);
+    alert('An error occurred during upload. Please check the console for more details.');
+    
+    // Reset the uploader on error as well
+    resetUploader();
+});
+
+function startUpload() {
+    const datasourceName = document.getElementById('datasource-name').value;
+    if (!datasourceName) {
+        alert('Please enter a data source name.');
+        return;
+    }
+    uppy.setMeta({ datasourceName: datasourceName });
+    console.log('Meta set:', uppy.getState().meta);
+    uppy.upload();
+}
+
+function resetUploader() {
+    uppy.reset();
+    document.getElementById('datasource-name').value = '';
+    document.getElementById('datasource-name').disabled = false;
+    document.getElementById('upload-confirmation').style.display = 'none';
+    document.getElementById('start-upload').style.display = 'inline-block';
+    document.getElementById('upload-another').style.display = 'none';
+    uppy.getPlugin('DragDrop').enable();
+}
+
+    function addDatasourceCard(tableName, displayName, rowCount) {
+        const cardHtml = `
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">${displayName}</h5>
+                        <p class="card-text">Rows: ${rowCount}</p>
+                        <button class="btn btn-danger delete-datasource" data-table="${tableName}">Delete</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('datasource-cards').insertAdjacentHTML('beforeend', cardHtml);
+    }
+
+
+    document.getElementById('datasource-cards').addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-datasource')) {
+            const tableName = e.target.getAttribute('data-table');
+            deleteDatasource(tableName, e.target.closest('.col-md-4'));
+        }
+    });
+
+    function deleteDatasource(tableName, cardElement) {
+        fetch('{% url "normalization:delete_datasource" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ tableName: tableName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                cardElement.remove();
+            } else {
+                alert('Failed to delete datasource');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the datasource');
+        });
+    }
+</script>
+{% endblock extra_js %}

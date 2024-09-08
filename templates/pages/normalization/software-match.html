@@ -1,0 +1,91 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'assets/css/plugins/uppy.min.css' %}">
+{% endblock extrastyle %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Upload CSV or XLSX File</h5>
+            </div>
+            <div class="card-body">
+                <div class="pc-uppy-3">
+                    <div class="for-DragDrop"></div>
+                    <div class="for-ProgressBar"></div>
+                    <div class="uploaded-files mt-3">
+                        <h5>Uploaded files:</h5>
+                        <ol></ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/plugins/uppy.min.js' %}"></script>
+<script>
+    const Uppy = window.Uppy;
+    const XHRUpload = Uppy.XHRUpload;
+
+	// Get CSRF token
+	function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    const uppy = new Uppy.Core({
+        debug: true,
+        autoProceed: true,
+        restrictions: {
+            maxNumberOfFiles: 1,
+            allowedFileTypes: ['.csv', '.xlsx']
+        }
+    });
+
+    uppy.use(Uppy.DragDrop, {
+        target: '.pc-uppy-3 .for-DragDrop'
+    });
+
+    uppy.use(Uppy.ProgressBar, {
+        target: '.pc-uppy-3 .for-ProgressBar',
+        hideAfterFinish: false
+    });
+
+    uppy.use(XHRUpload, {
+        endpoint: '{% url "upload_file" %}',
+        formData: true,
+        fieldName: 'file',
+        headers: {
+            'X-CSRFToken': csrftoken
+        }
+    });
+
+    uppy.on('upload-success', (file, response) => {
+        const li = document.createElement('li');
+        li.textContent = `${file.name} - ${response.body.message}`;
+        document.querySelector('.pc-uppy-3 .uploaded-files ol').appendChild(li);
+    });
+
+    uppy.on('error', (error) => {
+        console.error('Uppy error:', error);
+        alert('An error occurred during upload. Please try again.');
+    });
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,59 @@
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError
+from django_apscheduler.jobstores import DjangoJobStore
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
+scheduler = None
+
+def get_scheduler():
+    global scheduler
+    if scheduler is None:
+        initialize_scheduler()
+    return scheduler
+
+def initialize_scheduler():
+    global scheduler
+    if scheduler is None:
+        try:
+            scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
+            scheduler.add_jobstore(DjangoJobStore(), "default")
+            logger.info("Scheduler initialized successfully.")
+            ensure_scheduler_started()
+        except Exception as e:
+            logger.error(f"Error initializing scheduler: {str(e)}")
+
+def ensure_scheduler_started():
+    global scheduler
+    if scheduler and not scheduler.running:
+        scheduler.start()
+        logger.info("Scheduler started.")
+    elif scheduler and scheduler.running:
+        logger.info("Scheduler is already running.")
+    else:
+        logger.error("Scheduler not initialized. Cannot start.")
+
+def add_job(job, execute_job_func, app_name):
+    scheduler = get_scheduler()
+    if not scheduler:
+        logger.error("Scheduler not initialized")
+        return
+
+    # ... rest of the function remains the same ...
+
+def update_job_schedule(job, app_name, execute_job_func):
+    scheduler = get_scheduler()
+    if not scheduler:
+        logger.error("Scheduler not initialized")
+        return
+
+    # ... rest of the function remains the same ...
+
+def remove_job(script_id, app_name):
+    scheduler = get_scheduler()
+    if not scheduler:
+        logger.error("Scheduler not initialized")
+        return
+
+    # ... rest of the function remains the same ...

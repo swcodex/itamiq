@@ -1,0 +1,176 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+
+<div id="main-container" class="container mt-3" style="margin-left: 40px;">
+    <div class="row">
+        <div class="col-7 col-md-7 col-lg-7">
+            <h2 id="add-new-job" class="mb-4 text-left">Add New Job</h2>
+
+            {% if messages %}
+            <div class="messages mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="card mb-4">
+                    <h5 class="card-title mb-0">Job Details</h5>
+                    <div class="card-body">
+                        {% for field in job_form %}
+                            {% if field.name != 'schedule_days' and field.name != 'schedule_time' %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-top: 1px solid #9e9e9e;">
+
+                <div class="card mb-4">
+                    <h5 class="card-title mb-0">Schedule</h5>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ job_form.schedule_days.label_tag }}
+                            <div class="d-flex flex-wrap gap-3">
+                                {% for checkbox in job_form.schedule_days %}
+                                <div class="form-check">
+                                    {{ checkbox.tag }}
+                                    {{ checkbox.choice_label }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if job_form.schedule_days.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ job_form.schedule_days.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3" style="max-width: 118px;">
+                            {{ job_form.schedule_time.label_tag }}
+                            {{ job_form.schedule_time }}
+                            {% if job_form.schedule_time.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ job_form.schedule_time.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <hr class="my-4" style="border-top: 1px solid ##9e9e9e;">
+
+                <div class="card mb-4">
+                    <h5 class="card-title mb-0">Scripts</h5>
+                    <div class="card-body">
+                        {{ script_formset.management_form }}
+                        <div id="script-forms">
+                            {% for script_form in script_formset %}
+                            <div class="script-form mb-4">
+                                {% for field in script_form.visible_fields %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ field.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                                {% for hidden in script_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="add-script" class="btn btn-secondary">Add Another Script</button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'connector:job_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Add Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="empty-form" style="display: none;">
+    <div class="script-form mb-4">
+        {% for field in script_formset.empty_form.visible_fields %}
+        <div class="mb-3">
+            {{ field.label_tag }}
+            {{ field }}
+        </div>
+        {% endfor %}
+        {% for hidden in script_formset.empty_form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        border-radius: 0;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: none;
+    }
+    .form-control, .form-select {
+        border-radius: 0;
+    }
+    .btn {
+        border-radius: 0;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addScriptBtn = document.getElementById('add-script');
+        const scriptForms = document.getElementById('script-forms');
+        const emptyForm = document.getElementById('empty-form').firstElementChild;
+        const totalForms = document.getElementById('id_scripts-TOTAL_FORMS');
+    
+        addScriptBtn.addEventListener('click', function() {
+            const newForm = emptyForm.cloneNode(true);
+            const formCount = scriptForms.children.length;
+            updateFormIndex(newForm, formCount);
+            scriptForms.appendChild(newForm);
+            totalForms.value = formCount + 1;
+        });
+    
+        function updateFormIndex(form, index) {
+            form.innerHTML = form.innerHTML.replace(/__prefix__/g, index);
+            const orderInput = form.querySelector('input[name$="-order"]');
+            if (orderInput) {
+                orderInput.value = index + 1;
+            }
+        }
+    });
+</script>
+{% endblock %}

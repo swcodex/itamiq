@@ -1,0 +1,74 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Table List</h1>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Scripts and Tables</h3>
+                </div>
+
+                <div class="card-body">
+                    {% if scripts %}
+                            {% csrf_token %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Job Name</th>
+                                            <th>Script Name</th>
+                                            <th>Table Name</th>
+                                            <th>Last Import</th>
+                                            <th>Row Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for script in scripts %}
+                                            <tr>
+                                                <td>{{ script.job.name }}</td>
+                                                <td>{{ script.name }}</td>
+                                                <td>{{ script.table_name|default:"N/A" }}</td>
+                                                <td>{% if script.get_table %}{{ script.get_table.last_import|date:"m/d/y H:i"|default:"N/A" }}{% else %}N/A{% endif %}</td>
+                                                <td>{% if script.get_table %}{{ script.get_table.row_count|default:"0" }}{% else %}0{% endif %}</td>                                            
+                                                <td>
+                                                    {% if script.get_table %}
+                                                        <a href="{% url 'connector:table_edit' script.get_table.id %}" class="btn btn-sm btn-primary">Edit</a>
+                                                        <a href="{% url 'connector:table_view' script.get_table.id %}" class="btn btn-sm btn-info">View</a>
+                                                    {% else %}
+                                                        <span class="text-muted">No table</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>                                       
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                    {% else %}
+                        <p>No scripts found.</p>
+                    {% endif %}
+                    <!--<a href="{% url 'connector:job_list' %}" class="btn btn-secondary mt-3">Back to Job List</a>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+</script>
+
+{% endblock %}

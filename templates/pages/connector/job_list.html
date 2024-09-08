@@ -1,0 +1,121 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% csrf_token %}
+
+{% block extrastyle %}
+{% endblock extrastyle %}
+
+{% block content %}
+<h2>Stored Jobs</h2>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+{% if jobs %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Last Updated</th>
+            <th>Schedule</th>
+            <th>Last Execution</th>
+            <th>Status</th>
+            <th>Duration</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for job in jobs %}
+        <tr>
+            <td>{{ job.name }}</td>
+            <!-- <td>{{ job.description|default:"-" }}</td> -->
+            <td class="description-cell">{{ job.description|default:"-"|truncatechars:50 }}</td>
+            <td>{{ job.updated_at|date:"m/d/y H:i" }}</td>
+            <td>
+                {% if job.schedule_time %}
+                    {{ job.schedule_time }} on {{ job.get_schedule_days|join:", " }}
+                {% else %}
+                    Not scheduled
+                {% endif %}
+            </td>
+            <td>
+                {% if job.last_execution_time %}
+                    {{ job.last_execution_time|date:"m/d/y H:i" }}
+                {% else %}
+                    Not executed yet
+                {% endif %}
+            </td>
+            <td>
+                {% if job.last_execution_time %}
+                    {% if job.last_execution_success %}
+                        <span style="color: green;">Success</span>
+                    {% else %}
+                        <span style="color: red;">Failed</span>
+                        {% if job.last_execution_error %}
+                        <br><small>...{{ job.last_execution_error|slice:"-50:" }}</small>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if job.last_execution_time %}
+                    {{ job.last_execution_duration }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                <button onclick="executeJob({{ job.id }})" class="btn btn-sm btn-primary">Execute</button>
+                <a href="{% url 'connector:edit_job' job.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                <button onclick="deleteJob({{ job.id }})" class="btn btn-sm btn-danger">Delete</button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No jobs stored yet.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function executeJob(jobId) {
+    if (confirm('Are you sure you want to execute this job?')) {
+        fetch(`/connector/execute-job/${jobId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error executing job: ' + data.error);
+            } else {
+                alert('Job executed successfully. Output: ' + data.output);
+            }
+            location.reload();  // Reload the page to show updated job status
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while executing the job.');
+        });
+    }
+}
+
+function deleteJob(jobId) {
+    if (confirm('Are you sure you want to delete this job?')) {
+        window.location.href = `/connector/job/${jobId}/delete/`;
+    }
+}
+</script>
+{% endblock %}

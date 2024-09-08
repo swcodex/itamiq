@@ -1,0 +1,44 @@
+{% extends 'layouts/base-auth.html' %}
+{% load static %}
+
+{% block title %}Signup{% endblock title %}
+
+{% block content %}
+
+    <div class="auth-wrapper aut-bg-img-side cotainer-fiuid align-items-stretch">
+        <div class="row align-items-center w-100 align-items-stretch bg-white">
+            <div class="d-none d-lg-flex col-lg-8 aut-bg-img align-items-center d-flex justify-content-center">
+                <div class="col-md-8">
+                    <h1 class="text-white mb-5">Login in Datta Able</h1>
+                    <p class="text-white">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 align-items-stret h-100 align-items-center d-flex justify-content-center">
+                <form method="post" class=" auth-content text-center">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <i class="feather icon-user-plus auth-icon"></i>
+                    </div>
+                    <h3 class="mb-4">Sign up</h3>
+
+                    {% for field in form %}
+                        <div class="input-group mb-3">
+                            {{ field }}
+                        </div>
+                        <span class="text-danger">{{ field.errors }}</span>
+                    {% endfor %}
+                    <div class="form-group text-left">
+                        <div class="checkbox checkbox-fill d-inline">
+                            <input type="checkbox" name="checkbox-fill-2" id="checkbox-fill-2">
+                            <label for="checkbox-fill-2" class="cr">Send me the <a href="#!"> Newsletter</a> weekly.</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary shadow-2 mb-4">Sign up</button>
+                    <p class="mb-0 text-muted">Allready have an account? <a href="{% url 'login_v2' %}"> Log in</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

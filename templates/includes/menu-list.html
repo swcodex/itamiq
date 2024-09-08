@@ -1,0 +1,123 @@
+{% load i18n static admin_datta %}
+
+<ul class="nav pcoded-inner-navbar ">
+
+  {% if not request.user.is_authenticated %}
+    <li class="nav-item pcoded-menu-caption">
+      <label>Navigation</label>
+    </li>
+    <li data-username="dashboard Default Ecommerce CRM Analytics Crypto Project" class="nav-item pcoded-hasmenu">
+      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
+          class="pcoded-mtext">Dashboard</span></a>
+      <ul class="pcoded-submenu">
+        <li><a href="{% url 'index' %}">Default</a></li>
+      </ul>
+    </li>
+    <li
+      data-username="Authentication Sign up Sign in reset password Change password Personal information profile settings map form subscribe"
+      class="nav-item pcoded-hasmenu"
+    >
+      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="feather icon-lock"></i></span><span
+          class="pcoded-mtext">Authentication</span></a>
+      <ul class="pcoded-submenu">
+        <li><a href="{% url 'login_v1' %}">Sign IN</a></li>
+        <li><a href="{% url 'register_v1' %}">Sign UP</a></li>
+      </ul>
+    </li>
+  {% endif %}
+
+  {% if request.user.is_superuser %}
+    <li class="nav-item pcoded-menu-caption">
+      <label>Navigation</label>
+    </li>
+    <li data-username="dashboard Default Ecommerce CRM Analytics Crypto Project" class="nav-item pcoded-hasmenu">
+      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
+          class="pcoded-mtext">Dashboard</span></a>
+      <ul class="pcoded-submenu">
+        <li><a href="{% url 'admin:index' %}">Default</a></li>
+      </ul>
+    </li>
+  {% endif %}
+  
+  {% admin_get_menu as app_list %}
+  {% if app_list %}
+      {% for app in app_list %}
+          {% if app.has_perms and not app.pinned %}
+            <li class="nav-item pcoded-hasmenu">
+              <a  href="#" class="nav-link">
+                <span class="pcoded-micon"><i class="{% if app.icon %} {{ app.icon }} {% else %} feather icon-home {% endif %}"></i></span>
+                <span class="pcoded-mtext">{{ app.label|slice:15 }}{% if app.label|length > 15 %}..{% endif %}</span>
+              </a>
+              {% if app.models %}
+                <ul class="pcoded-submenu">
+                  {% for model in app.models %}
+                    {% if model.url %}
+                      <li>
+                        <a href="{{ model.url }}">{{ model.label }}</a>
+                      </li>
+                    {% else %}
+                      <li class="nav-item list-unstyled">{{ model.label }}</li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endif %}
+      {% endfor %}
+  {% endif %}
+  
+  {% if request.user.is_authenticated and not request.user.is_superuser %}
+    
+  <li class="nav-item pcoded-menu-caption">
+    <label>Software Normalization</label>
+  </li>
+  <li data-username="datasource_catalog" class="nav-item"><a href="{% url 'normalization:datasource_catalog' %}" class="nav-link"><span
+    class="pcoded-micon"><i class="feather icon-book"></i></span><span
+    class="pcoded-mtext">Software Catalog</span></a></li>
+  <li class="nav-item pcoded-menu-caption">
+    <label>Importer</label>
+  </li>
+
+  <li class="nav-item pcoded-menu-caption">
+    <label>Connectors</label>
+  </li>
+
+  <li data-username="table_list" class="nav-item"><a href="{% url 'connector:add_job' %}" class="nav-link"><span
+    class="pcoded-micon"><i class="feather icon-book"></i></span><span
+    class="pcoded-mtext">Create a New Job</span></a></li>  
+
+  <li data-username="job_list" class="nav-item"><a href="{% url 'connector:job_list' %}" class="nav-link"><span
+    class="pcoded-micon"><i class="feather icon-book"></i></span><span
+    class="pcoded-mtext">Scheduled Jobs</span></a></li>
+
+  <li data-username="table_list" class="nav-item"><a href="{% url 'connector:table_list' %}" class="nav-link"><span
+      class="pcoded-micon"><i class="feather icon-book"></i></span><span
+      class="pcoded-mtext">Database Tables</span></a></li>        
+
+  <li class="nav-item pcoded-menu-caption">
+     <label>Reconciliation</label>
+  </li>        
+
+  <li data-username="add_job" class="nav-item"><a href="{% url 'reconciliation:add_job' %}" class="nav-link"><span
+    class="pcoded-micon"><i class="feather icon-book"></i></span><span
+    class="pcoded-mtext">Create a New Job</span></a></li>  
+
+  <li data-username="job_list" class="nav-item"><a href="{% url 'reconciliation:job_list' %}" class="nav-link"><span
+    class="pcoded-micon"><i class="feather icon-book"></i></span><span
+    class="pcoded-mtext">Scheduled Jobs</span></a></li>
+    
+    <li class="nav-item pcoded-menu-caption">
+      <label>Reports</label>
+   </li>        
+
+  <li data-username="run_query" class="nav-item"><a href="{% url 'reports:run_query' %}" class="nav-link"><span
+     class="pcoded-micon"><i class="feather icon-book"></i></span><span
+     class="pcoded-mtext">Run Query</span></a></li>      
+
+  <li data-username="computer_chart" class="nav-item"><a href="{% url 'reports:computer_chart' %}" class="nav-link"><span
+     class="pcoded-micon"><i class="feather icon-book"></i></span><span
+     class="pcoded-mtext">Computer Chart</span></a></li>      
+
+
+{% endif %}
+</ul>

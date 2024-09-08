@@ -1,0 +1,51 @@
+{% extends 'layouts/base-auth.html' %}
+{% load static %}
+
+{% block title %}Signin{% endblock title %}
+
+{% block content %}
+
+    <div class="auth-wrapper aut-bg-img-side cotainer-fiuid align-items-stretch">
+        <div class="row align-items-center w-100 align-items-stretch bg-white">
+            <div class="d-none d-lg-flex col-lg-8 aut-bg-img align-items-center d-flex justify-content-center">
+                <div class="col-md-8">
+                    <h1 class="text-white mb-5">Login in Datta Able</h1>
+                    <p class="text-white">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 align-items-stret h-100 align-items-center d-flex justify-content-center">
+                <form method="post" class=" auth-content text-center">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <i class="feather icon-unlock auth-icon"></i>
+                    </div>
+                    <h3 class="mb-4">Login</h3>
+
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <span class="d-block mb-3 text-danger"> {{ error}} </span>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% for field in form %}
+                    <div class="input-group mb-3">
+                        {{ field }}
+                    </div>
+                    {% endfor %}
+
+                    <div class="form-group text-left">
+                        <div class="checkbox checkbox-fill d-inline">
+                            <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-a1" checked="">
+                            <label for="checkbox-fill-a1" class="cr"> Save credentials</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary shadow-2 mb-4">Login</button>
+                    <p class="mb-2 text-muted">Forgot password? <a href="{% url 'password_reset_v2' %}">Reset</a></p>
+                    <p class="mb-0 text-muted">Don’t have an account? <a href="{% url 'register_v2' %}">Signup</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}

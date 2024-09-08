@@ -1,0 +1,15 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% csrf_token %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'assets/css/plugins/uppy.min.css' %}">
+{% endblock extrastyle %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h2>Welcome to the Home Page</h2>
+    <p>This is the home page of our project.</p>
+    <a href="{% url 'connector:add_job' %}">Add Script</a>
+{% endblock %}

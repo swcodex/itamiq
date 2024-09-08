@@ -1,0 +1,276 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'assets/css/plugins/prism-coy.css' %}">
+{% endblock extrastyle %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block sidebar %}
+<!-- [ navigation menu ] start -->
+<nav class="pcoded-navbar theme-horizontal menu-light icon-colored">
+    <div class="navbar-wrapper">
+        <div class="navbar-brand header-logo">
+            <a href="{% url 'index' %}" class="b-brand">
+                <div class="b-bg">
+                    <i class="feather icon-trending-up"></i>
+                </div>
+                <span class="b-title">Datta Able</span>
+            </a>
+            <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
+        </div>
+        <div class="navbar-content sidenav-horizontal" id="layout-sidenav">
+            {% include 'includes/menu-list.html' %}
+        </div>
+    </div>
+</nav>
+<!-- [ navigation menu ] end -->
+{% endblock sidebar %}
+
+{% block header %}
+
+<!-- [ Header ] start -->
+<header class="navbar pcoded-header navbar-expand-lg navbar-light header-blue brand-primary ">
+    <div class="m-header">
+        <a class="mobile-menu" id="mobile-collapse1" href="#!"><span></span></a>
+        <a href="{% url 'index' %}" class="b-brand">
+            <div class="b-bg">
+                <i class="feather icon-trending-up"></i>
+            </div>
+            <span class="b-title">Datta Able</span>
+        </a>
+    </div>
+    <a class="mobile-menu" id="mobile-header" href="#!">
+        <i class="feather icon-more-horizontal"></i>
+    </a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+            <li><a href="#!" class="full-screen" onclick="javascript:toggleFullScreen()"><i
+                        class="feather icon-maximize"></i></a></li>
+            <li class="nav-item dropdown">
+                <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown">Dropdown</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#!">Action</a></li>
+                    <li><a class="dropdown-item" href="#!">Another action</a></li>
+                    <li><a class="dropdown-item" href="#!">Something else here</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <div class="main-search">
+                    <div class="input-group">
+                        <input type="text" id="m-search" class="form-control" placeholder="Search . . .">
+                        <a href="#!" class="input-group-append search-close">
+                            <i class="feather icon-x input-group-text"></i>
+                        </a>
+                        <span class="input-group-append search-btn btn btn-primary">
+                            <i class="feather icon-search input-group-text"></i>
+                        </span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+            <li>
+                <div class="dropdown">
+                    <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i
+                            class="icon feather icon-bell"></i></a>
+                    <div class="dropdown-menu dropdown-menu-end notification">
+                        <div class="noti-head">
+                            <h6 class="d-inline-block m-b-0">Notifications</h6>
+                            <div class="float-end">
+                                <a href="#!" class="m-r-10">mark as read</a>
+                                <a href="#!">clear all</a>
+                            </div>
+                        </div>
+                        <ul class="noti-body">
+                            <li class="n-title">
+                                <p class="m-b-0">NEW</p>
+                            </li>
+                            <li class="notification">
+                                <div class="media">
+                                    <img class="img-radius" src="{% static 'assets/images/user/avatar-1.jpg' %}"
+                                        alt="Generic placeholder image">
+                                    <div class="media-body">
+                                        <p><strong>John Doe</strong><span class="n-time text-muted"><i
+                                                    class="icon feather icon-clock m-r-10"></i>30 min</span></p>
+                                        <p>New ticket Added</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="n-title">
+                                <p class="m-b-0">EARLIER</p>
+                            </li>
+                            <li class="notification">
+                                <div class="media">
+                                    <img class="img-radius" src="{% static 'assets/images/user/avatar-2.jpg' %}"
+                                        alt="Generic placeholder image">
+                                    <div class="media-body">
+                                        <p><strong>Joseph William</strong><span class="n-time text-muted"><i
+                                                    class="icon feather icon-clock m-r-10"></i>30 min</span></p>
+                                        <p>Prchace New Theme and make payment</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="notification">
+                                <div class="media">
+                                    <img class="img-radius" src="{% static 'assets/images/user/avatar-3.jpg' %}"
+                                        alt="Generic placeholder image">
+                                    <div class="media-body">
+                                        <p><strong>Sara Soudein</strong><span class="n-time text-muted"><i
+                                                    class="icon feather icon-clock m-r-10"></i>30 min</span></p>
+                                        <p>currently login</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="noti-footer">
+                            <a href="#!">show all</a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li><a href="#!" class="displayChatbox"><i class="icon feather icon-mail"></i></a></li>
+            <li>
+                <div class="dropdown drp-user">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="icon feather icon-settings"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end profile-notification">
+                        <div class="pro-head">
+                            <img src="{% static 'assets/images/user/avatar-1.jpg' %}" class="img-radius"
+                                alt="User-Profile-Image">
+                            <span>John Doe</span>
+                            {% if request.user.is_superuser %}
+                            <a href="{% url 'admin:logout' %}" class="dud-logout" title="Logout">
+                                {% else %}
+                                <a href="{% url 'logout' %}" class="dud-logout" title="Logout">
+                                    {% endif %}
+                                    <i class="feather icon-log-out"></i>
+                                </a>
+                        </div>
+                        <ul class="pro-body">
+                            <li><a href="#!" class="dropdown-item"><i class="feather icon-settings"></i> Settings</a>
+                            </li>
+                            <li><a href="#!" class="dropdown-item"><i class="feather icon-user"></i> Profile</a></li>
+                            <li><a href="{% url 'messages' %}" class="dropdown-item"><i class="feather icon-mail"></i>
+                                    My Messages</a></li>
+                            <li><a href="{% url 'login_v1' %}" class="dropdown-item"><i class="feather icon-lock"></i>
+                                    Lock Screen</a>
+                            </li>
+                            {% if request.user.is_superuser %}
+                            <li><a href="{% url 'admin:password_change' %}" class="dropdown-item"><i
+                                        class="feather icon-mail"></i> Change Password</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</header>
+<!-- [ Header ] end -->
+
+
+{% endblock header %}
+
+{% block content %}
+
+<!-- [ Main Content ] start -->
+<div class="row">
+    <!-- [ horizontal-layout ] start -->
+    <div class="col-sm-12">
+        <div class="card">
+            
+            <div class="card-block">
+                <p>Horizontal layout is useful for those users who wants horizontal menu in your page.</p>
+                <h6>To use Fixed layout for your project link
+                    <code><strong>&lt;script src="../assets/js/horizontal-menu.js"&gt;&lt;/script&gt;</strong></code>
+                    and add below given snippet js in bottom of page.
+                </h6>
+                <pre>
+<code class="language-markup">
+    &lt;!-- [ navigation menu ] start --&gt;
+    &lt;nav class="pcoded-navbar theme-horizontal menu-light icon-colored"&gt;
+        &lt;div class="navbar-wrapper"&gt;
+            &lt;div class="navbar-brand header-logo"&gt;
+                &lt;!-- Your Logo is hear --&gt;
+            &lt;/div&gt;
+            &lt;div class="navbar-content sidenav-horizontal" id="layout-sidenav"&gt;
+                &lt;ul class="nav pcoded-inner-navbar sidenav-inner"&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/nav&gt;
+    &lt;!-- [ navigation menu ] end --&gt;
+
+    &lt;!-- [ header menu ] start --&gt;
+    &lt;header class="pcoded-navbar theme-horizontal menu-light icon-colored header-blue brand-primary"&gt;
+    &lt;/header&gt;
+    &lt;!-- [ header menu ] end --&gt;
+
+    &lt;!-- [ snippet js for horizontal layouts ] Start --&gt;
+    &lt;script type="text/javascript"&gt;
+    (function() {
+        if ($('#layout-sidenav').hasClass('sidenav-horizontal') || window.layoutHelpers.isSmallScreen()) {
+            return;
+        }
+        try {
+            window.layoutHelpers.setCollapsed(
+                localStorage.getItem('layoutCollapsed') === 'true',
+                false
+            );
+        } catch (e) {}
+    })();
+    $(function() {
+        // Initialize sidenav
+        $('#layout-sidenav').each(function() {
+            new SideNav(this, {
+                orientation: $(this).hasClass('sidenav-horizontal') ? 'horizontal' : 'vertical'
+            });
+        });
+        // Initialize sidenav togglers
+        $('body').on('click', '.layout-sidenav-toggle', function(e) {
+            e.preventDefault();
+            window.layoutHelpers.toggleCollapsed();
+            if (!window.layoutHelpers.isSmallScreen()) {
+                try {
+                    localStorage.setItem('layoutCollapsed', String(window.layoutHelpers.isCollapsed()));
+                } catch (e) {}
+            }
+        });
+    });
+    $(document).ready(function() {
+        $("#pcoded").pcodedmenu({
+            MenuTrigger: 'hover',
+            SubMenuTrigger: 'hover',
+        });
+    });
+    &lt;/script&gt;
+    &lt;!-- [ snippet js for horizontal layouts ] end --&gt;
+</code>
+                </pre>
+            </div>
+        </div>
+        <div class="card">
+            
+            <div class="card-block">
+                <pre>
+
+                                            </pre>
+            </div>
+        </div>
+    </div>
+    <!-- [ horizontal-layout ] end -->
+</div>
+<!-- [ Main Content ] end -->
+
+{% endblock content %}
+{% block fixed_plugin %}{% endblock fixed_plugin %}
+
+{% block extra_js %}
+
+<!-- prism Js -->
+<script src="{% static 'assets/js/plugins/prism.js' %}"></script>
+
+{% endblock extra_js %}

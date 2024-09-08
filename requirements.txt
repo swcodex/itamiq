@@ -1,0 +1,21 @@
+# Core
+django
+django-allauth
+PyJWT
+python-dotenv
+str2bool
+django-quill-editor
+pillow
+
+# Deployment
+whitenoise==6.5.0
+gunicorn==21.2.0
+cryptography==42.0.2
+
+django-apscheduler
+django-widget-tweaks
+django-template-partials
+mysqlclient
+pandas
+psycopg2
+openpyxl

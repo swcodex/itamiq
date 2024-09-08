@@ -1,0 +1,75 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2>Data Viewer</h2>
+    <p>To search for null values, type "null" in the search box. For non-null values, type "not null".</p>
+    <table id="dataTable" class="display">
+        <thead>
+            <tr>
+                {% for column in columns %}
+                    <th>{{ column }} <br> <input type="text" placeholder="Search {{ column }}" style="margin-top: 2px;"/></th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tfoot>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}
+{% block extra_js %}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.1.4/css/dataTables.dataTables.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/3.1.1/css/buttons.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.1.4/js/dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/3.1.1/js/dataTables.buttons.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/3.1.1/js/buttons.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/3.1.1/js/buttons.html5.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/3.1.1/js/buttons.print.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/3.1.1/js/buttons.colVis.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var table = $('#dataTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{% url "reports:data_viewer" %}',
+                type: 'GET'
+            },
+            columns: [
+                {% for column in columns %}
+                    { data: '{{ column }}' },
+                {% endfor %}
+            ],
+            pageLength: 50,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            paging: true,
+            autoWidth: true,
+            layout: {
+                topStart: {
+                    buttons: ['csv', 'excel']
+                },
+                bottomStart: {
+                    buttons: ['colvis']
+                }
+            }
+        });
+
+        // Apply the search
+        table.columns().every(function () {
+            var that = this;
+            $('input', this.header()).on('keyup change clear', function () {
+                if (that.search() !== this.value) {
+                    that
+                        .search(this.value)
+                        .draw();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

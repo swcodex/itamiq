@@ -1,0 +1,44 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Table View: {{ table.table_name }}</h1>
+            <h3 class="mb-3">Script: {{ script.name }}</h3>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Table Contents (First 100 rows)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    {% for column in columns %}
+                                        <th>{{ column }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in rows %}
+                                    <tr>
+                                        {% for cell in row %}
+                                            <td>{{ cell }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'connector:table_list' %}" class="btn btn-primary">Back to Table List</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

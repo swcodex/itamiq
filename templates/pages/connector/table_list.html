@@ -1,0 +1,47 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block content %}
+<h2>Table List</h2>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% if scripts %}
+                            {% csrf_token %}
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Job Name</th>
+                                            <th>Script Name</th>
+                                            <th>Table Name</th>
+                                            <th>Last Import</th>
+                                            <th>Row Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for script in scripts %}
+                                            <tr>
+                                                <td>{{ script.job.name }}</td>
+                                                <td>{{ script.name }}</td>
+                                                <td>{{ script.table_name|default:"N/A" }}</td>
+                                                <td>{% if script.get_table %}{{ script.get_table.last_import|date:"m/d/y H:i"|default:"N/A" }}{% else %}N/A{% endif %}</td>
+                                                <td>{% if script.get_table %}{{ script.get_table.row_count|default:"0" }}{% else %}0{% endif %}</td>                                            
+                                                <td>
+                                                    {% if script.get_table %}
+                                                        <a href="{% url 'connector:table_edit' script.get_table.id %}" class="btn btn-sm btn-primary">Edit</a>
+                                                        <a href="{% url 'connector:table_view' script.get_table.id %}" class="btn btn-sm btn-info">View</a>
+                                                    {% else %}
+                                                        <span class="text-muted">No table</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>                                       
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                    {% else %}
+                        <p>No scripts found.</p>
+{% endif %}
+
+{% endblock %}

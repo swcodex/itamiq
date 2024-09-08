@@ -1,0 +1,131 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Edit Table: {{ table.table_name }}</h1>
+
+    <form method="post" class="mb-5">
+        {% csrf_token %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Table Information</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Table Name:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ table.table_name }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Script:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ script.name }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Run Transform:</label>
+                    <div class="col-sm-9">
+                        {{ form.run_transform }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.transform_script.id_for_label }}">Transform Script:</label>
+                    <div class="mt-2 row">
+                        <div class="col-md-7"> <!-- This sets the width to 50% on medium and larger screens -->
+                            {{ form.transform_script|add_class:"form-control transform-script-textarea"|attr:"style:height: 300px; overflow-y: auto;" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Default Column Names:</label>
+                    <div class="mt-2 row">
+                        <div style="margin-left: 1px;">
+                            {{ form.default_column_names }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">Override Column Names:</label>
+                    <div class="mt-2 row">
+                        <div class="col-md-7"> <!-- This sets the width to 50% on medium and larger screens -->
+                            {{ form.override_column_names|add_class:"form-control transform-script-textarea"|attr:"style:height: 300px; overflow-y: auto;" }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Last Import:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ table.last_import }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Row Count:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ table.row_count }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Previous Row Count:</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-plaintext">{{ table.row_count_prev }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Columns</h2>
+            </div>
+            <div class="card-body">
+                {{ column_formset.management_form }}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Override Column Name</th>
+                            <th>Detected Data Type</th>
+                            <th>Override Data Type</th>
+                            <th>Is Unique</th>
+                            <th>Foreign Key</th>
+                            <th>Primary Key</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for column_form in column_formset %}
+                            <tr>
+                                <td>
+                                    {{ column_form.id }}
+                                    {{ column_form.column_name.value }}
+                                </td>
+                                <td>{{ column_form.override_column_name }}</td>
+                                <td>{{ column_form.detected_data_type.value }}</td>
+                                <td>{{ column_form.override_data_type }}</td>
+                                <td>{{ column_form.is_unique }}</td>
+                                <td>{{ column_form.foreign_key_reference }}</td>
+                                <td>{{ column_form.primary_key }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

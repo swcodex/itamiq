@@ -1,0 +1,28 @@
+{% extends 'layouts/base-auth.html' %}
+{% load static %}
+
+{% block title %}Error 403{% endblock title %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+    <div class="auth-content">
+        <div class="auth-bg">
+            <span class="r"></span>
+            <span class="r s"></span>
+            <span class="r s"></span>
+            <span class="r"></span>
+        </div>
+        <div class="card text-center px-2 py-3">
+            <h2 class="mb-3">Error 403</h2>
+            <h4 class="mb-3">Permission Denied</h4>
+            <p class="mb-3">We suggest you to go to the homepage while we solve this issue.</p>
+            <div>
+                <a href="/" class="btn btn-primary">Go to Homepage</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
