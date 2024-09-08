@@ -2,12 +2,14 @@
 Instructions for setting up the MariaDB instance:
 
 1.) Extract the MariaDB.zip file to C:\Temp\MariaDB
-2.) Run C:\Temp\MariaDB\bin\mysqld.exe --console
+2.) From a command line window run "C:\Temp\MariaDB\bin\mysqld.exe --console"
 
-Confirm there are no errors displayed
+Last line of the console output should show:
+0 [Note] C:\Temp\MariaDB\bin\mysqld.exe: ready for connections.
+Version: '11.5.2-MariaDB-log'  socket: ''  port: 3306  mariadb.org binary distribution
 
 -----
 
-Default django user credentials:
-user: itam
-pw: django123
+Django login URL: http://localhost:8000/accounts/login-v1/
+Credentials: itam/django123
+
