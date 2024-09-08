@@ -9,5 +9,5 @@ Confirm there are no errors displayed
 -----
 
 Default django user credentials:
-user: itamu
+user: itam
 pw: django123
