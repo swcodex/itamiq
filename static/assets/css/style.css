@@ -19808,4 +19808,141 @@ Help Desk Application css start
     padding: 10px 0;
 }
 
+    /* DataTable Styles  */
+    table.dataTable thead th.dt-colreorder-drag { cursor: move; background-color: #f8f9fa; }
+    table.dataTable thead th.dt-colreorder-dragging { opacity: 0.5; }
+
+    /* Modal Styles */
+    #filter-modal .modal-dialog { max-width: 40%; }
+    #query-builder { min-height: 400px; }
+
+    /* Change the background color of the builder */
+    #query-builder .rules-group-container {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    /* Change the color of the rule backgrounds */
+    #query-builder .rule-container {
+        background-color: #ffffff;
+        border-color: #ced4da;
+    }
+
+    /* Change the color of the group headers */
+    #query-builder .rules-group-header {
+        background-color: #e9ecef;
+    }
+
+    /* Change the color of the operator selects */
+    #query-builder .rule-operator-container select {
+        background-color: #ffffff;
+        border-color: #ced4da;
+    }
+
+    /* Change the color of the input fields */
+    #query-builder .rule-value-container input {
+        background-color: #ffffff;
+        border-color: #ced4da;
+    }
+
+    /* Change the color of the remove buttons */
+    #query-builder .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    /* Change the color of the add rule buttons */
+    #query-builder .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    /* Filter Styles */
+    #active-filters {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 15px;
+        max-width: 300px;
+    }
+    
+    #filter-list { margin-top: 10px; }
+    #filter-list > div { margin-bottom: 5px; }
+
+    /* Related Tables Styles */
+    #related-tables-list .card {
+        margin-bottom: 0px;
+        border: none;           /* Ensure no border around the card */
+        box-shadow: none;        /* Ensure no shadow */
+    }
+
+    #related-tables-list .card-header {
+        padding: 0;
+        border: none;            /* Remove border from the header */
+        box-shadow: none;        /* Remove shadow from the header */
+    }
+
+    #related-tables-list .btn-link {
+        width: 20%;
+        text-align: left;
+        color: #000000;
+        text-decoration: none;
+        background-color: transparent; /* Remove any default background */
+    }
+
+    #related-tables-list .card-body label { 
+        display: block; 
+        margin-bottom: 0px; 
+    }
+
+    #related-tables-container {
+        padding-top: 20px;
+    }
+    
+    #related-tables-list > div {
+        margin-bottom: 5px;
+    }
+
+    #length-menu-container, #button-container {
+        margin-bottom: 10px;
+    }
+    
+/**====== button container ======**/
+
+    #button-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    #button-container > * {
+        margin-left: 5px;
+    }
+
+    #button-container .dt-buttons {
+        display: flex;
+        float: none;
+    }
+
+    .custom-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .custom-btn:hover {
+        color: #fff;
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    .dt-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+
 /**====== user card css end ======**/

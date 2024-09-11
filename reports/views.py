@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connections, DatabaseError
@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 def run_query(request):
     return render(request, 'pages/reports/query_form.html')
+
+def run_query_sql(request):
+    return render(request, 'pages/reports/query_form_sql.html')
 
 def get_device_counts():
     with connections['itam'].cursor() as cursor:
@@ -123,8 +126,6 @@ def get_related_tables(request, table_id):
         return JsonResponse({'error': 'An error occurred while fetching related tables'}, status=500)
     
 
-from .query_builder import build_query, get_paginated_results, translate_query_builder_rules
-
 @require_http_methods(["POST"])
 @csrf_exempt
 def generate_report(request):
@@ -173,6 +174,37 @@ def generate_report(request):
         logger.error(f"Unexpected error in generate_report: {str(e)}")
         return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
     
+
+@csrf_exempt    
+def generate_report_sql(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        sql_query = data.get('sql_query')
+        page = data.get('page', 1)
+        per_page = data.get('per_page', 10)
+
+        try:
+            with connections['itam'].cursor() as cursor:
+                cursor.execute(sql_query)
+                columns = [col[0] for col in cursor.description]
+                rows = cursor.fetchall()
+
+            total_count = len(rows)
+            start = (page - 1) * per_page
+            end = start + per_page
+            paginated_rows = rows[start:end]
+
+            results = [dict(zip(columns, row)) for row in paginated_rows]
+
+            return JsonResponse({
+                'results': results,
+                'total_count': total_count
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @require_http_methods(["GET"])
 def get_filter_options(request):
@@ -246,6 +278,59 @@ def export_report(request):
         logger.error(f"Unexpected error in export_report: {str(e)}")
         return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
     
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def export_report_sql(request):
+    try:
+        data = json.loads(request.body)
+        sql_query = data.get('sql_query')
+        export_type = data.get('export_type', 'csv')
+        column_order = data.get('column_order', [])
+
+        if not sql_query:
+            return JsonResponse({'error': 'SQL query is required'}, status=400)
+
+        # Execute the SQL query
+        with connections['itam'].cursor() as cursor:
+            cursor.execute(sql_query)
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        # If column_order is provided, use it to order the columns
+        if column_order:
+            ordered_columns = [col for col in column_order if col in columns]
+            # Add any columns that were in the query but not in the order
+            ordered_columns.extend([col for col in columns if col not in ordered_columns])
+        else:
+            ordered_columns = columns
+
+        if export_type == 'csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="report_export.csv"'
+            writer = csv.writer(response)
+            writer.writerow(ordered_columns)
+            for row in results:
+                writer.writerow([row.get(col, '') for col in ordered_columns])
+        elif export_type == 'excel':
+            workbook = openpyxl.Workbook()
+            worksheet = workbook.active
+            worksheet.append(ordered_columns)
+            for row in results:
+                worksheet.append([row.get(col, '') for col in ordered_columns])
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="report_export.xlsx"'
+            workbook.save(response)
+        else:
+            return JsonResponse({'error': 'Invalid export type'}, status=400)
+
+        return response
+    except Exception as e:
+        logger.error(f"Unexpected error in export_report: {str(e)}")
+        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
+
+
 @require_http_methods(["POST"])
 @csrf_exempt
 def save_configuration(request):
@@ -253,23 +338,29 @@ def save_configuration(request):
         data = json.loads(request.body)
         name = data.get('name')
         config = data.get('configuration')
+        sql_report = data.get('sql_report', False)  # Get sql_report value, default to False if not provided
         
         if not name or not config:
             return JsonResponse({'error': 'Name and configuration are required'}, status=400)
         
         report_config, created = ReportConfiguration.objects.update_or_create(
             name=name,
-            defaults={'configuration': json.dumps(config)}
+            defaults={
+                'configuration': json.dumps(config),
+                'sql_report': sql_report  # Add this line to save the sql_report value
+            }
         )
         
         return JsonResponse({'message': 'Configuration saved successfully', 'id': report_config.id})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
 @require_http_methods(["GET"])
 def get_configurations(request):
     configs = ReportConfiguration.objects.all().values('id', 'name')
     return JsonResponse(list(configs), safe=False)
+
 
 @require_http_methods(["GET"])
 def load_configuration(request, config_id):
@@ -280,3 +371,28 @@ def load_configuration(request, config_id):
         return JsonResponse({'error': 'Configuration not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def report_configurations(request):
+    configurations = ReportConfiguration.objects.all().order_by('-updated_at')
+    return render(request, 'pages/reports/report_configurations.html', {'configurations': configurations})
+
+
+def view_report_configuration(request, config_id):
+    config = get_object_or_404(ReportConfiguration, id=config_id)
+    
+    if config.sql_report:
+        template_name = 'pages/reports/view_report_configuration_sql.html'
+    else:
+        template_name = 'pages/reports/view_report_configuration.html'
+    
+    return render(request, template_name, {'config_id': config_id})
+
+
+
+def delete_configuration(request, config_id):
+    config = get_object_or_404(ReportConfiguration, id=config_id)
+    if request.method == 'POST':
+        config.delete()
+        return redirect('reports:report_configurations')  # Use the URL name here
+    return redirect('reports:report_configurations')  # Use the URL name here as well

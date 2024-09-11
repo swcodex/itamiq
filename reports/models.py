@@ -28,6 +28,7 @@ class Relationship(models.Model):
 class ReportConfiguration(models.Model):
     name = models.CharField(max_length=255, unique=True)
     configuration = models.TextField()
+    sql_report = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

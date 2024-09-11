@@ -90,9 +90,16 @@
     class="pcoded-micon"><i class="feather icon-book"></i></span><span
     class="pcoded-mtext">Scheduled Jobs</span></a></li>
 
-  <li data-username="table_list" class="nav-item"><a href="{% url 'connector:table_list' %}" class="nav-link"><span
-      class="pcoded-micon"><i class="feather icon-book"></i></span><span
-      class="pcoded-mtext">Database Tables</span></a></li>        
+    <li data-username="table_list" class="nav-item">
+      <a href="{% url 'connector:table_list' %}" 
+         class="nav-link"
+         hx-get="{% url 'connector:table_list' %}" 
+         hx-target="#page-wrapper"
+         hx-push-url="true">
+          <span class="pcoded-micon"><i class="feather icon-book"></i></span>
+          <span class="pcoded-mtext">Database Tables</span>
+      </a>
+  </li>
 
   <li class="nav-item pcoded-menu-caption">
      <label>Reconciliation</label>
@@ -114,10 +121,17 @@
      class="pcoded-micon"><i class="feather icon-book"></i></span><span
      class="pcoded-mtext">Run Query</span></a></li>      
 
+  <li data-username="run_query_sql" class="nav-item"><a href="{% url 'reports:run_query_sql' %}" class="nav-link"><span
+    class="pcoded-micon"><i class="feather icon-book"></i></span><span
+    class="pcoded-mtext">Run Query SQL</span></a></li>   
+
   <li data-username="computer_chart" class="nav-item"><a href="{% url 'reports:computer_chart' %}" class="nav-link"><span
      class="pcoded-micon"><i class="feather icon-book"></i></span><span
      class="pcoded-mtext">Computer Chart</span></a></li>      
 
+  <li data-username="report_configurations" class="nav-item"><a href="{% url 'reports:report_configurations' %}" class="nav-link"><span
+    class="pcoded-micon"><i class="feather icon-book"></i></span><span
+    class="pcoded-mtext">Saved Reports</span></a></li>  
 
 {% endif %}
 </ul>

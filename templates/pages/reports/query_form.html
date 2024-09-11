@@ -4,103 +4,81 @@
 {% block title %}Report Builder{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jQuery-QueryBuilder@3.0.0/dist/css/query-builder.default.min.css">
-<style>
-    /* DataTable Styles */
-    table.dataTable thead th.dt-colreorder-drag { cursor: move; background-color: #f8f9fa; }
-    table.dataTable thead th.dt-colreorder-dragging { opacity: 0.5; }
 
-    /* Modal Styles */
-    #filter-modal .modal-dialog { max-width: 80%; }
-    #query-builder { min-height: 600px; }
-
-    /* Filter Styles */
-    #active-filters {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 0.25rem;
-        padding: 15px;
-    }
-    #filter-list { margin-top: 10px; }
-    #filter-list > div { margin-bottom: 5px; }
-
-    /* Related Tables Styles */
-    #related-tables-list .card { margin-bottom: 2px; }
-    #related-tables-list .card-header { padding: 0; }
-    #related-tables-list .btn-link {
-        
-        width: 40%;
-        text-align: left;
-        color: #007bff;
-        text-decoration: none;
-        padding: 0.75rem 1.25rem;
-    }
-    #related-tables-list .btn-link:hover,
-    #related-tables-list .btn-link:focus {
-        color: #0056b3;
-        text-decoration: none;
-        background-color: #f8f9fa;
-    }
-    #related-tables-list .card-body { padding: 1rem; }
-    #related-tables-list .card-body label { display: block; margin-bottom: 2px; }
-</style>
 {% endblock %}
 
 {% block content %}
-<h3>Report Builder</h3>
+<h3>View Report Configuration</h3>
 
-<!-- Configuration Controls -->
+<!--
 <div class="row mb-3">
     <div class="col-md-6">
         <select id="load-config" class="form-control">
             <option value="">Load Saved Configuration</option>
         </select>
     </div>
-    <div class="col-md-4">
-        <input type="text" id="save-config-name" class="form-control" placeholder="Configuration Name">
+</div>
+-->
+
+<!-- Left Container -->
+<div style="width: 320px; float: left; margin-right: 10px;">
+    <!-- Table Selection -->
+    <div class="table-selection-container" style="width: 90%; margin-bottom: 15px;">
+        <select id="table-select" class="form-control">
+            <option value="">Select a table</option>
+        </select>
     </div>
-    <div class="col-md-2">
-        <button id="save-config" class="btn btn-primary">Save Configuration</button>
+
+    <!-- Filter and Generate Controls -->
+    <button id="generate-report" class="btn btn-secondary" style="display: none;">Generate Report</button>
+
+    <!-- Columns Container -->
+    <div id="columns-container" style="display: none;">
+        <h5>Columns</h5>
+        <div id="columns-list"></div>
+    </div>
+
+    <!-- Related Tables Container -->
+    <div id="related-tables-container" style="display: none;">
+        <h5>Related Tables</h5>
+        <div id="related-tables-list"></div>
     </div>
 </div>
 
-<!-- Table Selection -->
-<select id="table-select">
-    <option value="">Select a table</option>
-</select>
+<!-- Right Container -->
+<div style="overflow: hidden; padding-left: 20px; max-width: 100%;">
+    <!-- Active Filters Display -->
+    <div id="active-filters" style="display: none; margin-bottom: 15px;">
+        <h4>Active Filters:</h4>
+        <div id="filter-list"></div>
+    </div>
 
-<!-- Columns Container -->
-<div id="columns-container" style="display: none;">
-    <h5>Columns</h5>
-    <div id="columns-list"></div>
+     
+    <!-- Report Results -->
+    <div id="report-results" style="display: none;">
+        <div id="length-menu-container"></div>
+        <div id="button-container" class="d-flex justify-content-end align-items-center" style="margin-bottom: 15px;">
+            <div class="col-md-3">
+                <input type="text" id="save-config-name" class="form-control" placeholder="Configuration Name">
+            </div>
+            <div class="col-md-2">
+                <button id="save-config" class="btn btn-primary">Save Configuration</button>
+            </div>
+            <button id="filter-button" class="btn btn-secondary custom-btn" style="display: none;">Filter</button>
+            <div class="dt-buttons"></div>
+        </div>  
+        <div class="table-responsive">
+            <table id="results-table" class="table table-striped" style="width:100%">
+                <thead>
+                    <tr id="table-headers"></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<!-- Related Tables Container -->
-<div id="related-tables-container" style="display: none;">
-    <h5>Related Tables</h5>
-    <div id="related-tables-list"></div>
-</div>
 
-<!-- Filter and Generate Controls -->
-<button id="filter-button" class="btn btn-secondary" style="display: none;">Filter</button>
-<button id="generate-report" style="display: none;">Generate Report</button>
-
-<!-- Active Filters Display -->
-<div id="active-filters" style="display: none; margin-bottom: 15px;">
-    <h4>Active Filters:</h4>
-    <div id="filter-list"></div>
-</div>
-
-<!-- Report Results -->
-<div id="report-results" style="display: none;">
-    <h2>Report Results</h2>
-    <table id="results-table" class="table table-striped table-bordered" style="width:100%">
-        <thead>
-            <tr id="table-headers"></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</div>
 
 <!-- Filter Modal -->
 <div class="modal fade" id="filter-modal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
@@ -126,7 +104,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/jQuery-QueryBuilder@3.0.0/dist/js/query-builder.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function() {
@@ -167,9 +144,10 @@
                                 $('<input>', {
                                     type: 'checkbox',
                                     name: 'columns[]',
-                                    value: column.id
+                                    value: column.id,
+                                    style: 'margin-right: 3px; margin-bottom: 7px;'
                                 }),
-                                $('<span>').text(column.name + ' (' + column.data_type + ')')
+                                $('<span>').text(column.name)
                             )
                         )
                     );
@@ -193,20 +171,21 @@
                 relatedTablesList.empty();
     
                 await Promise.all(data.map(async (relatedTable, index) => {
-                    var tableDiv = $('<div>', { class: 'card' });
+                    var tableDiv = $('<div>', { class: 'card', style: 'width: 100%; margin-bottom: 10px;' });
                     var tableHeader = $('<div>', { class: 'card-header', id: 'heading' + index });
                     var tableButton = $('<button>', {
                         class: 'btn btn-link',
                         type: 'button',
                         'data-target': '#collapse' + index,
-                        text: relatedTable.name
+                        text: relatedTable.name,
+                        style: 'white-space: normal; word-wrap: break-word; text-align: left; width: 100%; padding: 0;'
                     });
                     tableHeader.append(tableButton);
                     tableDiv.append(tableHeader);
     
                     var collapseDiv = $('<div>', { id: 'collapse' + index, class: 'collapse' });
                     var cardBody = $('<div>', { class: 'card-body' });
-                    var columnsList = $('<div>');
+                    var columnsList = $('<div>', { style: 'margin-left: -23px; margin-top: -25px; margin-bottom: -25px;' });
                     cardBody.append(columnsList);
                     collapseDiv.append(cardBody);
                     tableDiv.append(collapseDiv);
@@ -221,7 +200,8 @@
                                     $('<input>', {
                                         type: 'checkbox',
                                         name: 'columns[]',
-                                        value: column.id
+                                        value: column.id,
+                                        style: 'margin-right: 3px; margin-bottom: 7px;'
                                     }),
                                     $('<span>').text(column.name)
                                 )
@@ -234,6 +214,7 @@
                     var target = $($(this).data('target'));
                     target.collapse('toggle');
                 });
+
     
                 return data;
             } catch (error) {
@@ -259,6 +240,9 @@
         }
 
     function initializeDataTable(columns, initialData) {
+        // Clear existing content
+        $('#length-menu-container').empty();
+
         if (dataTable) {
             dataTable.destroy();
             $('#results-table').empty();
@@ -290,7 +274,7 @@
             }),
             data: initialData || [],
             pageLength: 10,
-            searching: true,
+            searching: false,
             ordering: true,
             serverSide: true,
             processing: true,
@@ -300,17 +284,33 @@
             colReorder: true,
             dom: 'Blfrtip',
             buttons: [
-                { extend: 'colvis', text: 'Column Visibility' },
-                { text: 'Save Column Order', action: function (e, dt, node, config) { saveColumnOrder(); } },
-                { text: 'Reset Column Order', action: function (e, dt, node, config) { resetColumnOrder(); } },
-                { text: 'Export All to CSV', action: async function (e, dt, node, config) { await exportAllData('csv'); } },
-                { text: 'Export All to Excel', action: async function (e, dt, node, config) { await exportAllData('excel'); } }
+                { 
+                text: 'Reset Column Order', 
+                className: 'btn btn-secondary custom-btn',
+                action: function (e, dt, node, config) { resetColumnOrder(); } 
+                },
+                { 
+                text: 'Export All to CSV', 
+                className: 'btn btn-secondary custom-btn',
+                action: async function (e, dt, node, config) { await exportAllData('csv'); } 
+                },
+                { 
+                text: 'Export All to Excel', 
+                className: 'btn btn-secondary custom-btn',
+                action: async function (e, dt, node, config) { await exportAllData('excel'); } 
+                }
             ],
             language: {
                 emptyTable: 'No records found',
                 zeroRecords: 'No matching records found'
             }
         });
+
+        // Move DataTables buttons to the button container
+        dataTable.buttons().container().appendTo('#button-container .dt-buttons');
+
+        // Show the filter button if it's supposed to be visible
+        $('#filter-button').css('display', '');
 
         console.log("DataTable initialized:", dataTable);
     }

@@ -7,16 +7,20 @@
   {% include 'includes/head.html' %}
   {% block style %}
 
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/colreorder/1.5.6/css/colReorder.dataTables.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap4.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jQuery-QueryBuilder@3.0.0/dist/css/query-builder.default.min.css">
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-extendext/1.0.0/jquery-extendext.js"></script>
-   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
-   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/colreorder/1.5.6/css/colReorder.dataTables.min.css">
+
   <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript" src="https://cdn.datatables.net/colreorder/1.5.6/js/dataTables.colReorder.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap4.min.css">
+
   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap4.min.js"></script>
   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.colVis.min.js"></script>
@@ -26,6 +30,10 @@
   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
   <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.9.6/ace.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.9.6/mode-sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.9.6/theme-sqlserver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.9.6/ext-language_tools.min.js"></script>  
+  <script src="https://cdn.jsdelivr.net/npm/jQuery-QueryBuilder@3.0.0/dist/js/query-builder.min.js"></script>
 
     <!-- Favicon icon -->
     <link rel="icon" href="{% static 'assets/images/favicon.ico' %}" type="image/x-icon">
@@ -48,26 +56,25 @@
     {% include 'includes/sidebar.html' %}
   {% endblock sidebar %}
 
-  	<!-- [ Main Content ] start -->
-	<div class="pcoded-main-container">
-		<div class="pcoded-wrapper">
-			<div class="pcoded-content">
-				<div class="pcoded-inner-content">
+<!-- [ Main Content ] start -->
+<div class="pcoded-main-container">
+  <div class="pcoded-wrapper">
+      <div class="pcoded-content">
+          <div class="pcoded-inner-content">
+              {% block breadcrumbs %}
+                  {% include 'includes/breadcrumbs.html' %}
+              {% endblock breadcrumbs %}
 
-          {% block breadcrumbs %}
-            {% include 'includes/breadcrumbs.html' %}
-          {% endblock breadcrumbs %}
-
-          <div class="main-body">
-						<div class="page-wrapper">
-              {% block content %}{% endblock content %}
-            </div>
+              <div class="main-body">
+                  <div id="page-wrapper" class="page-wrapper">
+                      {% block content %}{% endblock content %}
+                  </div>
+              </div>
           </div>
-
-        </div>
       </div>
-    </div>
   </div>
+</div>
+
 
 
   <script>

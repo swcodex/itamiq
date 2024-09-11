@@ -179,40 +179,15 @@ def delete_job(request, job_id):
 
 
 def table_list(request):
-    if request.method == 'POST':
-        for script in Script.objects.all():
-            run_transform_key = f'run_transform_{script.id}'
-            transform_script_key = f'transform_script_{script.id}'
-            
-            # Update run_transform (will be False if checkbox is unchecked)
-            script.run_transform = run_transform_key in request.POST
-            
-            # Update transform_script regardless of run_transform status
-            if transform_script_key in request.POST:
-                script.transform_script = request.POST[transform_script_key]
-            
-            script.save()
-
-            # Handle column updates
-            for column in script.columns.all():
-                comment_key = f'column_comment_{column.id}'
-                related_column_key = f'column_related_{column.id}'
-
-                if comment_key in request.POST:
-                    column.comment = request.POST[comment_key]
-                if related_column_key in request.POST:
-                    column.override_column_name = request.POST[related_column_key]
-                
-                column.save()
-        
-        messages.success(request, 'Changes saved successfully.')
-        return redirect('connector:table_list')
-    
     scripts = Script.objects.select_related('job').prefetch_related(
         'columns', 
         'tables'
     ).all()
-    return render(request, 'pages/connector/table_list.html', {'scripts': scripts})
+    
+    if request.htmx:
+        return render(request, 'pages/connector/partials/table_list.html', {'scripts': scripts})
+    else:
+        return render(request, 'pages/connector/table_list.html', {'scripts': scripts})
 
 
 def table_view(request, table_id):

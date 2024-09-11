@@ -29,7 +29,7 @@ class Script(models.Model):
     order_exec = models.PositiveIntegerField()
     table_name = models.CharField(max_length=255, null=True, blank=True)  # New required field
     #column_names = models.CharField(max_length=4000, null=True, blank=True) #Should change this to textfield 
-    import_enabled = models.BooleanField(default=False)  # New field
+    import_enabled = models.BooleanField(default=True)  # New field
     #transform_script = models.TextField(blank=True, null=True)  # New field
     #run_transform = models.BooleanField(default=False)  # New field
 

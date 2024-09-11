@@ -255,75 +255,64 @@
 
 </style>
 {% endblock %}
+
 {% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.2"></script>
 <script>
+// Main function to run when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    initializeExistingEditors();
+    setupAddScriptButton();
+    setupFormSubmission();
+});
+
+// Initialize existing Ace editors
+function initializeExistingEditors() {
+    document.querySelectorAll('.ace-editor').forEach((editorElement, index) => {
+        initializeAceEditor(editorElement, index);
+    });
+    setupAllDeleteCheckboxes();
+}
+
+// Setup the "Add Another Script" button
+function setupAddScriptButton() {
     const addScriptButton = document.getElementById('add-script');
     const scriptForms = document.getElementById('script-forms');
     const totalFormsInput = document.querySelector('#id_scripts-TOTAL_FORMS');
     const emptyForm = document.querySelector('#empty-form').innerHTML;
 
-    // Initialize existing editors
-    document.querySelectorAll('.ace-editor').forEach((editorElement, index) => {
-        initializeAceEditor(editorElement, index);
-    });
-
-    setupAllDeleteCheckboxes();
-
     addScriptButton.addEventListener('click', function() {
         const formCount = scriptForms.children.length;
-        const newForm = document.createElement('div');
-        newForm.innerHTML = emptyForm.replace(/__prefix__/g, formCount);
-        newForm.classList.add('script-form', 'mb-4');
+        const newForm = createNewScriptForm(emptyForm, formCount);
         
         scriptForms.appendChild(newForm);
         totalFormsInput.value = formCount + 1;
     
-        // Initialize the new editor
-        const newEditorElement = newForm.querySelector('.ace-editor');
-        initializeAceEditor(newEditorElement, formCount);
-    
-        // Hide the textarea
-        const newTextarea = newForm.querySelector(`textarea[name$="-content"]`);
-        if (newTextarea) {
-            newTextarea.style.display = 'none';
-        }
-    
-        // Pre-populate the 'order' field
-        const orderField = newForm.querySelector('input[name$="-order_exec"]');
-        if (orderField) {
-            orderField.value = formCount + 1;
-        }
-
+        initializeAceEditor(newForm.querySelector('.ace-editor'), formCount);
         setupDeleteCheckbox(newForm);
-
     });
+}
 
-    function setupDeleteCheckbox(form) {
-        const deleteCheckbox = form.querySelector('input[name$="-DELETE"]');
-        if (deleteCheckbox) {
-            deleteCheckbox.addEventListener('change', function() {
-                form.style.opacity = this.checked ? '0.5' : '1';
-            });
-        }
+// Create a new script form
+function createNewScriptForm(emptyForm, formCount) {
+    const newForm = document.createElement('div');
+    newForm.innerHTML = emptyForm.replace(/__prefix__/g, formCount);
+    newForm.classList.add('script-form', 'mb-4');
+    
+    const newTextarea = newForm.querySelector(`textarea[name$="-content"]`);
+    if (newTextarea) {
+        newTextarea.style.display = 'none';
+    }
+    
+    const orderField = newForm.querySelector('input[name$="-order_exec"]');
+    if (orderField) {
+        orderField.value = formCount + 1;
     }
 
-    function setupAllDeleteCheckboxes() {
-        document.querySelectorAll('.script-form').forEach(form => {
-            setupDeleteCheckbox(form);
-        });
-    }
+    return newForm;
+}
 
-    // Handle form submission
-    document.querySelector('form').addEventListener('submit', function() {
-        document.querySelectorAll('.ace-editor').forEach((editorElement, index) => {
-            const editor = ace.edit(editorElement);
-            const textarea = document.querySelector(`#id_scripts-${index}-content`);
-            textarea.value = editor.getValue();
-        });
-    });
-});
-
+// Initialize Ace editor
 function initializeAceEditor(editorElement, index) {
     const editor = ace.edit(editorElement);
     editor.setTheme("ace/theme/textmate");
@@ -331,22 +320,45 @@ function initializeAceEditor(editorElement, index) {
     editor.setOptions({
         fontSize: "11pt",
         wrap: true,
-        highlightActiveLine: true, // Disable highlighting of the active line
-        highlightGutterLine: false, // Disable highlighting of the gutter line
-        showPrintMargin: true // Remove the vertical print margin
+        highlightActiveLine: true,
+        highlightGutterLine: false,
+        showPrintMargin: true
     });
 
-    // Set initial content if any
     const textarea = document.querySelector(`#id_scripts-${index}-content`);
     if (textarea) {
-        editor.setValue(textarea.value, -1); // The -1 moves the cursor to the start
+        editor.setValue(textarea.value, -1);
     }
 
-    // Clear selection and move cursor to start
     editor.clearSelection();
     editor.moveCursorTo(0, 0);
     editor.blur();
+}
 
+// Setup delete checkbox for a form
+function setupDeleteCheckbox(form) {
+    const deleteCheckbox = form.querySelector('input[name$="-DELETE"]');
+    if (deleteCheckbox) {
+        deleteCheckbox.addEventListener('change', function() {
+            form.style.opacity = this.checked ? '0.5' : '1';
+        });
+    }
+}
+
+// Setup all delete checkboxes
+function setupAllDeleteCheckboxes() {
+    document.querySelectorAll('.script-form').forEach(setupDeleteCheckbox);
+}
+
+// Setup form submission
+function setupFormSubmission() {
+    document.querySelector('form').addEventListener('submit', function() {
+        document.querySelectorAll('.ace-editor').forEach((editorElement, index) => {
+            const editor = ace.edit(editorElement);
+            const textarea = document.querySelector(`#id_scripts-${index}-content`);
+            textarea.value = editor.getValue();
+        });
+    });
 }
 </script>
 {% endblock %}

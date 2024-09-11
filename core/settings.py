@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'widget_tweaks',
     "template_partials",
-
+    'django_htmx',
     'home',
 
     'apps.common',
@@ -74,7 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'django_htmx.middleware.HtmxMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 ]
 
