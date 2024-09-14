@@ -19,3 +19,4 @@ mysqlclient
 pandas
 psycopg2
 openpyxl
+django-htmx==1.19.0
