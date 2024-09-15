@@ -1,8 +1,4 @@
-{% extends 'layouts/base.html' %}
-{% load static %}
-
 {% block content %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
     <div id="main-container" class="container mt-3" style="margin-left: 20px;">
         <div class="row">
             <div class="col-7 col-md-7 col-lg-7">
@@ -30,8 +26,7 @@
                       hx-post="{% url 'connector:add_job_api' %}"
                       hx-target="#notification-container"
                       hx-swap="innerHTML"
-                      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                      hx-on::after-request="this.reset()">
+                      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
                     {% csrf_token %}
 
                     <div class="card mb-4">
@@ -346,18 +341,17 @@
 
 {% block extra_js %}
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const addScriptButton = document.getElementById('add-script');
-            const scriptForms = document.getElementById('script-forms');
-            const totalFormsInput = document.querySelector('#id_scripts-TOTAL_FORMS');
-            const emptyForm = document.querySelector('#empty-form').innerHTML;
+            var addScriptButton = document.getElementById('add-script');
+            var scriptForms = document.getElementById('script-forms');
+            var totalFormsInput = document.querySelector('#id_scripts-TOTAL_FORMS');
+            var emptyForm = document.querySelector('#empty-form').innerHTML;
             document.querySelectorAll('.ace-editor').forEach((editorElement, index) => {
                 initializeAceEditor(editorElement, index);
             });
 
             addScriptButton.addEventListener('click', function() {
-                const formCount = scriptForms.children.length;
-                const newForm = document.createElement('div');
+                var formCount = scriptForms.children.length;
+                var newForm = document.createElement('div');
                 newForm.innerHTML = emptyForm.replace(/__prefix__/g, formCount);
                 newForm.classList.add('script-form', 'mb-4');
                 
@@ -365,17 +359,17 @@
                 totalFormsInput.value = formCount + 1;
             
                 // Initialize the new editor
-                const newEditorElement = newForm.querySelector('.ace-editor');
+                var newEditorElement = newForm.querySelector('.ace-editor');
                 initializeAceEditor(newEditorElement, formCount);
             
                 // Hide the textarea
-                const newTextarea = newForm.querySelector(`textarea[name$="-content"]`);
+                var newTextarea = newForm.querySelector(`textarea[name$="-content"]`);
                 if (newTextarea) {
                     newTextarea.style.display = 'none';
                 }
             
                 // Pre-populate the 'order' field
-                const orderField = newForm.querySelector('input[name$="-order_exec"]');
+                var orderField = newForm.querySelector('input[name$="-order_exec"]');
                 if (orderField) {
                     orderField.value = formCount + 1;
                 }
@@ -385,7 +379,7 @@
             });
 
             function setupDeleteCheckbox(form) {
-                const deleteCheckbox = form.querySelector('input[name$="-DELETE"]');
+                var deleteCheckbox = form.querySelector('input[name$="-DELETE"]');
                 if (deleteCheckbox) {
                     deleteCheckbox.addEventListener('change', function() {
                         form.style.opacity = this.checked ? '0.5' : '1';
@@ -400,14 +394,14 @@
             }
 
             document.getElementById('job-form').addEventListener('reset', () => {
-                const editors = document.querySelectorAll('.ace-editor');
+                var editors = document.querySelectorAll('.ace-editor');
                 editors.forEach(editor => {
                     ace.edit(editor).setValue('');
                 });
             });
 
         function initializeAceEditor(editorElement, index) {
-            const editor = ace.edit(editorElement);
+            var editor = ace.edit(editorElement);
             editor.setTheme("ace/theme/textmate");
             editor.session.setMode("ace/mode/python");
             editor.setOptions({
@@ -418,7 +412,7 @@
                 showPrintMargin: true
             });
 
-            const textarea = document.querySelector(`#id_scripts-${index}-content`);
+            var textarea = document.querySelector(`#id_scripts-${index}-content`);
             if (textarea) {
                 editor.setValue(textarea.value, -1);
             }
@@ -436,12 +430,13 @@
         }
 
             document.body.addEventListener('htmx:afterSwap', function(event) {
-                const toast = document.querySelector('#notification-container');
+                var toast = document.querySelector('#notification-container');
                 if (toast) {
-                    const successResponse = event?.detail?.xhr?.response?.includes('success');
-                    const errorResponse = event?.detail?.xhr?.response?.includes('error');
+                    var successResponse = event?.detail?.xhr?.response?.includes('success');
+                    var errorResponse = event?.detail?.xhr?.response?.includes('error');
                     if (successResponse) {
                         toast.style.background = '#4CAF50';
+                        document.getElementById('job-form').reset()
                     }
                     if (errorResponse) {
                         toast.style.background = '#f44336';
@@ -459,6 +454,5 @@
                 }
             });
 
-        });
     </script>
 {% endblock %}

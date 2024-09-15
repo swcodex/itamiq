@@ -76,7 +76,7 @@ def add_job_api(request):
             error_html = f'<div class="error">Error occurred while saving the job.<br>{job_form_errors_html}<br>{script_formset_errors_html}</div>'
 
             # Return the error HTML
-            return HttpResponse(error_html, status = 400)
+            return HttpResponse(error_html)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 

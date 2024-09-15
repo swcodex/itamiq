@@ -1,5 +1,13 @@
 {% load i18n static admin_datta %}
+<script>
+    function toggleActiveClass() {
+        document.querySelectorAll('ul.pcoded-inner-navbar li').forEach(function(li) {
+            li.classList.remove('active');
+        });
 
+        document.getElementById('add_job_nav').classList.add('active');
+    }
+</script>
 <ul class="nav pcoded-inner-navbar ">
 
   {% if not request.user.is_authenticated %}
@@ -38,7 +46,7 @@
       </ul>
     </li>
   {% endif %}
-  
+
   {% admin_get_menu as app_list %}
   {% if app_list %}
       {% for app in app_list %}
@@ -65,9 +73,9 @@
           {% endif %}
       {% endfor %}
   {% endif %}
-  
+
   {% if request.user.is_authenticated and not request.user.is_superuser %}
-    
+
   <li class="nav-item pcoded-menu-caption">
     <label>Software Normalization</label>
   </li>
@@ -82,18 +90,21 @@
     <label>Connectors</label>
   </li>
 
-  <li data-username="table_list" class="nav-item"><a href="{% url 'connector:add_job' %}" class="nav-link"><span
-    class="pcoded-micon"><i class="feather icon-book"></i></span><span
-    class="pcoded-mtext">Create a New Job</span></a></li>  
+
+      <li data-username="table_list" class="nav-item" id="add_job_nav" hx-get="{% url 'connector:add_job' %}" hx-trigger="click"
+          hx-swap="innerHTML" hx-target="#page-wrapper" hx-on::after-request="toggleActiveClass()"><a href="#"
+                                                                                                class="nav-link"><span
+              class="pcoded-micon"><i class="feather icon-book"></i></span><span
+              class="pcoded-mtext">Create a New Job</span></a></li>
 
   <li data-username="job_list" class="nav-item"><a href="{% url 'connector:job_list' %}" class="nav-link"><span
     class="pcoded-micon"><i class="feather icon-book"></i></span><span
     class="pcoded-mtext">Scheduled Jobs</span></a></li>
 
     <li data-username="table_list" class="nav-item">
-      <a href="{% url 'connector:table_list' %}" 
+      <a href="{% url 'connector:table_list' %}"
          class="nav-link"
-         hx-get="{% url 'connector:table_list' %}" 
+         hx-get="{% url 'connector:table_list' %}"
          hx-target="#page-wrapper"
          hx-push-url="true">
           <span class="pcoded-micon"><i class="feather icon-book"></i></span>
@@ -103,35 +114,35 @@
 
   <li class="nav-item pcoded-menu-caption">
      <label>Reconciliation</label>
-  </li>        
+  </li>
 
   <li data-username="add_job" class="nav-item"><a href="{% url 'reconciliation:add_job' %}" class="nav-link"><span
     class="pcoded-micon"><i class="feather icon-book"></i></span><span
-    class="pcoded-mtext">Create a New Job</span></a></li>  
+    class="pcoded-mtext">Create a New Job</span></a></li>
 
   <li data-username="job_list" class="nav-item"><a href="{% url 'reconciliation:job_list' %}" class="nav-link"><span
     class="pcoded-micon"><i class="feather icon-book"></i></span><span
     class="pcoded-mtext">Scheduled Jobs</span></a></li>
-    
+
     <li class="nav-item pcoded-menu-caption">
       <label>Reports</label>
-   </li>        
+   </li>
 
   <li data-username="run_query" class="nav-item"><a href="{% url 'reports:run_query' %}" class="nav-link"><span
      class="pcoded-micon"><i class="feather icon-book"></i></span><span
-     class="pcoded-mtext">Run Query</span></a></li>      
+     class="pcoded-mtext">Run Query</span></a></li>
 
   <li data-username="run_query_sql" class="nav-item"><a href="{% url 'reports:run_query_sql' %}" class="nav-link"><span
     class="pcoded-micon"><i class="feather icon-book"></i></span><span
-    class="pcoded-mtext">Run Query SQL</span></a></li>   
+    class="pcoded-mtext">Run Query SQL</span></a></li>
 
   <li data-username="computer_chart" class="nav-item"><a href="{% url 'reports:computer_chart' %}" class="nav-link"><span
      class="pcoded-micon"><i class="feather icon-book"></i></span><span
-     class="pcoded-mtext">Computer Chart</span></a></li>      
+     class="pcoded-mtext">Computer Chart</span></a></li>
 
   <li data-username="report_configurations" class="nav-item"><a href="{% url 'reports:report_configurations' %}" class="nav-link"><span
     class="pcoded-micon"><i class="feather icon-book"></i></span><span
-    class="pcoded-mtext">Saved Reports</span></a></li>  
+    class="pcoded-mtext">Saved Reports</span></a></li>
 
 {% endif %}
 </ul>
